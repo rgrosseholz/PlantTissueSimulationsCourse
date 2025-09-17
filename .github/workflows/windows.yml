@@ -1,0 +1,65 @@
+name: Compile clean and package for windows
+run-name: ${{ github.actor }} is testing on windows
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '5.15.2' # Specify the required Qt version
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_mingw81' 
+        setup-develop-environment: true
+
+    - name: Configure Project with qmake
+      run: |
+        cd src
+        qmake VirtualLeaf.pro
+    - name: Build Project
+      run: |
+        cd src
+        mingw32-make # Use 'mingw32-make' if you are using MinGW instead of MSVC
+    - name: Package Project
+      uses: actions/upload-artifact@v4
+      with:
+        name: VirtualLeaf-windows-x64
+        path: |
+          ${{ github.workspace }}/bin/**/*
+          ${{ github.workspace }}/data/**/*
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Install
+      run: sudo apt-get install zip gzip
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - uses: actions/download-artifact@v4
+    - name: Display structure of downloaded files
+      run: ls -R ${{ github.workspace }}
+ 
+    - name: '📦 Package windows x64'
+      if: github.event_name == 'release' && github.event.action == 'created'
+      run: |
+        zip -r VirtualLeaf-windows-x64.zip VirtualLeaf-windows-x64
+        gh release upload ${{github.event.release.tag_name}} VirtualLeaf-windows-x64.zip        
+      env:
+        GITHUB_TOKEN: ${{ github.TOKEN }}
+      shell: bash
+
