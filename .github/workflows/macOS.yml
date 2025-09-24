@@ -13,9 +13,14 @@ permissions:
   contents: write
 
 jobs:
+
   build:
     runs-on: macos-latest
     steps:
+    - name: Prepare Python environment
+      run: |
+        python3 -m pip install --upgrade pip wheel setuptools
+
     - name: Checkout code
       uses: actions/checkout@v3
 
@@ -31,7 +36,7 @@ jobs:
       shell: bash
       run: |
         cd src
-        qmake CONFIG+=c++14 VirtualLeaf.pro -early QMAKE_DEFAULT_LIBDIRS=$(xcrun -show-sdk-path)/usr/lib
+        qmake CONFIG+=c++14 VirtualLeaf.pro
 
     - name: Build Project
       shell: bash
@@ -50,7 +55,7 @@ jobs:
       shell: bash
       run: |
         cd ${{ github.workspace }}/bin
-        macdeployqt VirtualLeaf.app
+        $Qt5_DIR/bin/macdeployqt VirtualLeaf.app
         otool -L VirtualLeaf.app/Contents/MacOS/VirtualLeaf
 
     - name: Zip with ditto (preserve macOS metadata)
