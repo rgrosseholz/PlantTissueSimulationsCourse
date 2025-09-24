@@ -8,14 +8,14 @@ on:
   pull_request:
   release:
     types: [created]
+    
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: macos-latest
     steps:
-    - name: Prepare Python environment
-      run: |
-        python3 -m pip install --upgrade pip wheel setuptools
     - name: Checkout code
       uses: actions/checkout@v3
 
