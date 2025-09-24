@@ -24,6 +24,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Install Xcode Command Line Tools
+      run: |
+        sudo xcode-select --install
+
     - name: Set up Qt
       id: qt
       uses: jurplel/install-qt-action@v3
