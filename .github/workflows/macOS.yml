@@ -19,7 +19,7 @@ jobs:
     steps:
     - name: Prepare Python environment
       run: |
-        python3 -m pip install --upgrade pip wheel setuptools
+        python3 -m pip install --upgrade pip wheel setuptools --break-system-packages
 
     - name: Checkout code
       uses: actions/checkout@v3
