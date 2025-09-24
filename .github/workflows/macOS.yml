@@ -20,35 +20,45 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Set up Qt
+      id: qt
       uses: jurplel/install-qt-action@v3
       with:
-        version: '5.15.2' # Specify the required Qt version
+        version: '5.15.2'
         host: 'mac'
         target: 'desktop'
 
     - name: Configure Project with qmake
+      shell: bash
       run: |
         cd src
         qmake CONFIG+=c++14 VirtualLeaf.pro -early QMAKE_DEFAULT_LIBDIRS=$(xcrun -show-sdk-path)/usr/lib
+
     - name: Build Project
+      shell: bash
       run: |
         cd src
         make
-    - name: include data and models
+
+    - name: Include data and models
+      shell: bash
       run:  |
         cd ${{ github.workspace }}/bin
         mv ../data VirtualLeaf.app/Contents/data
-        mv models VirtualLeaf.app/Contents/models
+        mv ../models VirtualLeaf.app/Contents/models
+
     - name: Deploy Qt Frameworks
+      shell: bash
       run: |
         cd ${{ github.workspace }}/bin
         macdeployqt VirtualLeaf.app
         otool -L VirtualLeaf.app/Contents/MacOS/VirtualLeaf
-        
+
     - name: Zip with ditto (preserve macOS metadata)
+      shell: bash
       run: |
         cd ${{ github.workspace }}/bin
         ditto -c -k --sequesterRsrc --keepParent VirtualLeaf.app ../VirtualLeaf-macos-x64.zip
+
     - name: Upload zipped artifact
       uses: actions/upload-artifact@v4
       with:
@@ -56,27 +66,29 @@ jobs:
         path: ${{ github.workspace }}/VirtualLeaf-macos-x64.zip
 
   release:
+    if: github.event_name == 'release' && github.event.action == 'created'
     runs-on: ubuntu-latest
     needs: build
     steps:
-    - name: Install
+    - name: Install tools
       run: sudo apt-get install zip gzip
+
     - name: Checkout code
       uses: actions/checkout@v3
-    - uses: actions/download-artifact@v4
+
+    - name: Download artifact
+      uses: actions/download-artifact@v4
       with:
         name: VirtualLeaf-macos-x64
         path: ./
+
     - name: Display structure of downloaded files
       run: ls -R ${{ github.workspace }}
 
-    - name: '📦 Package MacOS x64'
-      if: github.event_name == 'release' && github.event.action == 'created'
+    - name: Upload to GitHub Release
       run: |
-        gh release upload ${{github.event.release.tag_name}} VirtualLeaf-macos-x64.zip    
+        gh release upload ${{ github.event.release.tag_name }} VirtualLeaf-macos-x64.zip
       env:
-        GITHUB_TOKEN: ${{ github.TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: bash
-
-
 
