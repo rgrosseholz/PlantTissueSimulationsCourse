@@ -17,12 +17,9 @@ jobs:
   build:
     runs-on: macos-latest
     steps:
-    - name: Prepare Python environment
-      run: |
-        python3 -m pip install --upgrade pip wheel setuptools --break-system-packages
 
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Qt
       id: qt
