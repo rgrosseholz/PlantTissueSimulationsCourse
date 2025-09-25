@@ -39,7 +39,7 @@ jobs:
       shell: bash
       run: |
         cd src
-        make
+        make VERBOSE=1
 
     - name: Include data and models
       shell: bash
