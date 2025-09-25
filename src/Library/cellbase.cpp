@@ -516,15 +516,16 @@ CellBase* CellBase::getOtherWallElementSide(NodeBase * spikeEnd,NodeBase * over)
 	return NULL;
 }
 
-void CellBase::insertNodeAfterFirst(NodeBase * position1,NodeBase * position2, NodeBase * newNode) {
-  std::_List_iterator<Node*> indexOfC = std::find_if(this->nodes.begin(), this->nodes.end(), [position1,position2](auto node){
-      return node->Index()==position1->Index()||node->Index()==position2->Index();
+void CellBase::insertNodeAfterFirst(NodeBase * position1, NodeBase * position2, NodeBase * newNode) {
+  auto indexOfC = std::find_if(this->nodes.begin(), this->nodes.end(), [position1, position2](auto node) {
+      return node->Index() == position1->Index() || node->Index() == position2->Index();
   });
-  if (indexOfC == this->nodes.begin() && (this->nodes.back()==position1||this->nodes.back()==position2)) {
-    this->nodes.insert(indexOfC,(Node*)newNode);
-  }else {
+
+  if (indexOfC == this->nodes.begin() && (this->nodes.back() == position1 || this->nodes.back() == position2)) {
+    this->nodes.insert(indexOfC, (Node*)newNode);
+  } else {
     indexOfC++;
-    this->nodes.insert(indexOfC,(Node*)newNode);
+    this->nodes.insert(indexOfC, (Node*)newNode);
   }
 }
 
