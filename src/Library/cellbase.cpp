@@ -527,7 +527,7 @@ void CellBase::insertNodeAfterFirst(NodeBase * position1,NodeBase * position2, N
     this->nodes.insert(indexOfC,(Node*)newNode);
   }
 }
-s
+
 
 void CellBase::ConstructNeighborList(void)
 {
