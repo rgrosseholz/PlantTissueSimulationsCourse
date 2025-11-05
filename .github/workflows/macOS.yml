@@ -26,7 +26,7 @@ jobs:
       - name: Configure Project with qmake
         run: |
           cd src
-          qmake VirtualLeaf.pro
+          qmake VirtualLeaf.pro QMAKE_MACOSX_DEPLOYMENT_TARGET=10.13
       - name: Build Project
         run: |
           cd src
