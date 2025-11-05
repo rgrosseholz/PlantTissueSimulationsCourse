@@ -36,15 +36,9 @@ jobs:
           g++ --version
           mingw32-make --version
 
-      - name: Configure Project with qmake
-        run: |
-          cd src
-          qmake VirtualLeaf.pro
-
       - name: Build Project
-        run: |
-          cd src
-          mingw32-make
+        run: cd ${{ github.workspace }}/src;qmake VirtualLeaf.pro;mingw32-make
+        shell: pwsh
 
       - name: Package Project
         uses: actions/upload-artifact@v4
