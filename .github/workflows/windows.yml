@@ -23,9 +23,9 @@ jobs:
           target: 'desktop'
           arch: 'win64_mingw81'
       - name: Setup MinGW
-          uses: egor-tensin/setup-mingw@v2
-          with:
-            platform: x64
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          platform: x64
           
       - name: Configure Project with qmake
         run: |
