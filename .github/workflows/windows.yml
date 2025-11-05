@@ -1,15 +1,16 @@
-name: Compile clean and package for windows
-run-name: ${{ github.actor }} is testing on windows
+name: VirtualLeaf compile clean and package for windows
+run-name: ${{ github.actor }} is testing on windows 🚀
 
 on:
   push:
     branches:
       - main
+  pull_request:
   release:
     types: [created]
 
 permissions:
-  contents: write
+  content: write
 
 jobs:
   build:
