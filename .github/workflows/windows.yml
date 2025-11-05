@@ -29,14 +29,14 @@ jobs:
 
       - name: Add MinGW to PATH
         run: |
-          echo "${{ runner.temp }}\Qt\Tools\mingw810_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          $env:PATH = "${{ runner.temp }}\Qt\Tools\mingw810_64\bin;$env:PATH"
+          echo "$env:IQTA_TOOLS\mingw810_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           echo "PATH updated"
         shell: pwsh
 
       - name: Verify MinGW installation
         run: |
           echo "Current PATH: $env:PATH"
+          echo "IQTA_TOOLS: $env:IQTA_TOOLS"
           where.exe g++
           g++ --version
           mingw32-make --version
@@ -44,7 +44,7 @@ jobs:
 
       - name: Build Project
         run: |
-          $env:PATH = "${{ runner.temp }}\Qt\Tools\mingw810_64\bin;$env:PATH"
+          $env:PATH = "$env:IQTA_TOOLS\mingw810_64\bin;$env:PATH"
           cd src
           qmake VirtualLeaf.pro
           mingw32-make
