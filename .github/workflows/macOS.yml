@@ -9,8 +9,8 @@ on:
   release:
     types: [created]
 
-  permissions:
-    contents: write
+permissions:
+  contents: write
 
 jobs:
   build:
