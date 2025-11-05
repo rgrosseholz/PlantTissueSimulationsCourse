@@ -30,6 +30,18 @@ jobs:
       - name: Fix libc++ compatibility issue
         run: |
           sed -i '' 's/std::_List_iterator<Node\*>/std::list<Node*>::iterator/g' src/Library/cellbase.cpp
+          
+      - name: Fix WallElementInfo circular dependency
+        run: |
+          # Find the line with forward declaration and add include after it
+          awk '/^class WallElementInfo;$/ {print; print "#include \"wallelementinfo.h\""; next} 1' src/Library/cellbase.h > src/Library/cellbase.h.tmp && mv src/Library/cellbase.h.tmp src/Library/cellbase.h
+          
+      - name: Fix WallElementInfo circular dependency
+        run: |
+          # Add include for wallelementinfo.h in cellbase.h after the forward declaration
+          sed -i '' '/class WallElementInfo;/a\
+          #include "wallelementinfo.h"
+          ' src/Library/cellbase.h
 
       - name: Configure Project with qmake
         run: |
