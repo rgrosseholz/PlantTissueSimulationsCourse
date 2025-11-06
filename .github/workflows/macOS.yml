@@ -1,5 +1,6 @@
-name: VirtualLeaf compile clean and package for macOS
-run-name: ${{ github.actor }} is testing on macOS
+name: VirtualLeaf compile, clean, and package for macOS (x64)
+run-name: ${{ github.actor }} is testing on macOS (x64) 🚀 
+
 on:
   push:
     branches:
@@ -15,80 +16,67 @@ jobs:
   build:
     runs-on: macos-15-intel
     steps:
-      - name: Prepare Python environment
-        run: |
-          python3 -m pip install --upgrade pip wheel setuptools
+    - name: Prepare Python environment
+      run: |
+        python3 -m pip install --upgrade pip wheel setuptools
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Set up Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '5.15.2' # Specify the required Qt version
+        host: 'mac'
+        target: 'desktop'
 
-      - name: Fix libc++ compatibility issue
-        run: |
-          sed -i '' 's/std::_List_iterator<Node\*>/std::list<Node*>::iterator/g' src/Library/cellbase.cpp
-
-      - name: Set up Qt
-        uses: jurplel/install-qt-action@v3
-        with:
-          version: '5.15.2'
-          host: 'mac'
-          target: 'desktop'
-
-      - name: Configure Project with qmake
-        run: |
-          cd src
-          qmake CONFIG+=c++14 VirtualLeaf.pro -early QMAKE_DEFAULT_LIBDIRS=$(xcrun -show-sdk-path)/usr/lib
-
-      - name: Build Project
-        run: |
-          cd src
-          make
-
-      - name: Include data and models
-        run: |
-          cd ${{ github.workspace }}/bin
-          if [ -d "../data" ]; then
-            mv ../data VirtualLeaf.app/Contents/data || cp -r ../data VirtualLeaf.app/Contents/data
-          fi
-          if [ -d "models" ]; then
-            mv models VirtualLeaf.app/Contents/models || cp -r models VirtualLeaf.app/Contents/models
-          fi
-
-      - name: Deploy Qt Frameworks
-        run: |
-          cd ${{ github.workspace }}/bin
-          macdeployqt VirtualLeaf.app
-          otool -L VirtualLeaf.app/Contents/MacOS/VirtualLeaf
-
-      - name: Zip with ditto (preserve macOS metadata)
-        run: |
-          cd ${{ github.workspace }}/bin
-          ditto -c -k --sequesterRsrc --keepParent VirtualLeaf.app ../VirtualLeaf-macos-x64.zip
-
-      - name: Upload zipped artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: VirtualLeaf-macos-x64
-          path: ${{ github.workspace }}/VirtualLeaf-macos-x64.zip
+    - name: Configure Project with qmake
+      run: |
+        cd src
+        qmake CONFIG+=c++14 VirtualLeaf.pro -early QMAKE_DEFAULT_LIBDIRS=$(xcrun -show-sdk-path)/usr/lib
+    - name: Build Project
+      run: |
+        cd src
+        make
+    - name: include data and models
+      run:  |
+        cd ${{ github.workspace }}/bin
+        mv ../data VirtualLeaf.app/Contents/data
+        mv models VirtualLeaf.app/Contents/models
+    - name: Deploy Qt Frameworks
+      run: |
+        cd ${{ github.workspace }}/bin
+        macdeployqt VirtualLeaf.app
+        otool -L VirtualLeaf.app/Contents/MacOS/VirtualLeaf
+        
+    - name: Zip with ditto (preserve macOS metadata)
+      run: |
+        cd ${{ github.workspace }}/bin
+        ditto -c -k --sequesterRsrc --keepParent VirtualLeaf.app ../VirtualLeaf-macos-x64.zip
+    - name: Upload zipped artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: VirtualLeaf-macos-x64
+        path: ${{ github.workspace }}/VirtualLeaf-macos-x64.zip
 
   release:
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name == 'release' && github.event.action == 'created'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Install
+      run: sudo apt-get install zip gzip
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - uses: actions/download-artifact@v4
+      with:
+        name: VirtualLeaf-macos-x64
+        path: ./
+    - name: Display structure of downloaded files
+      run: ls -R ${{ github.workspace }}
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: VirtualLeaf-macos-x64
-          path: ./
-
-      - name: Display structure of downloaded files
-        run: ls -R ${{ github.workspace }}
-
-      - name: '📦 Package macOS x64'
-        run: |
-          gh release upload ${{ github.event.release.tag_name }} VirtualLeaf-macos-x64.zip
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        shell: bash
+    - name: '📦 Package MacOS x64'
+      if: github.event_name == 'release' && github.event.action == 'created'
+      run: |
+        gh release upload ${{github.event.release.tag_name}} VirtualLeaf-macos-x64.zip    
+      env:
+        GITHUB_TOKEN: ${{ github.TOKEN }}
+      shell: bash
