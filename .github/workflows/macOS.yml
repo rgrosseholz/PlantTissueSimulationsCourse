@@ -22,6 +22,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Fix libc++ compatibility issue
+        run: |
+          sed -i '' 's/std::_List_iterator<Node\*>/std::list<Node*>::iterator/g' src/Library/cellbase.cpp
+
       - name: Set up Qt
         uses: jurplel/install-qt-action@v3
         with:
