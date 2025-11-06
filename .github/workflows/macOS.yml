@@ -25,6 +25,13 @@ jobs:
       - name: Fix libc++ compatibility issue
         run: |
           sed -i '' 's/std::_List_iterator<Node\*>/std::list<Node*>::iterator/g' src/Library/cellbase.cpp
+          
+      - name: Fix WallElementInfo circular dependency
+        run: |
+          # Add include after the forward declaration in cellbase.h
+          sed -i '' '/^class WallElementInfo;$/a\
+          #include "wallelementinfo.h"
+          ' src/Library/cellbase.h
 
       - name: Set up Qt
         uses: jurplel/install-qt-action@v3
