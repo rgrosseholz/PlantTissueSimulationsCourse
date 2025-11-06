@@ -32,14 +32,13 @@ jobs:
           LINE=$(grep -n "^class WallElementInfo;" src/Library/cellbase.h | head -1 | cut -d: -f1)
           echo "Found WallElementInfo forward declaration at line: $LINE"
           
-          # Insert the include right after that specific line only
-          sed -i '' "${LINE}a\\
-#include \"wallelementinfo.h\"
-" src/Library/cellbase.h
+          # Use awk to insert the include after the first forward declaration only
+          awk -v line="$LINE" 'NR==line {print; print "#include \"wallelementinfo.h\""; next} 1' src/Library/cellbase.h > src/Library/cellbase.h.tmp
+          mv src/Library/cellbase.h.tmp src/Library/cellbase.h
           
           # Verify it worked
           echo "=== Lines around line $LINE after change ==="
-          sed -n "$((LINE)),$((LINE+2))p" src/Library/cellbase.h
+          sed -n "${LINE},$((LINE+2))p" src/Library/cellbase.h
 
       - name: Set up Qt
         uses: jurplel/install-qt-action@v3
