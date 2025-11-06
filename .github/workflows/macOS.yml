@@ -28,10 +28,9 @@ jobs:
           
       - name: Fix WallElementInfo circular dependency
         run: |
-          # Add include after the forward declaration in cellbase.h
-          sed -i '' '/^class WallElementInfo;$/a\
-          #include "wallelementinfo.h"
-          ' src/Library/cellbase.h
+          # Add include after the forward declaration in cellbase.h using awk
+          awk '/^class WallElementInfo;$/ {print; print "#include \"wallelementinfo.h\""; next} 1' src/Library/cellbase.h > src/Library/cellbase.h.tmp
+          mv src/Library/cellbase.h.tmp src/Library/cellbase.h
 
       - name: Set up Qt
         uses: jurplel/install-qt-action@v3
