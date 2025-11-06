@@ -26,19 +26,14 @@ jobs:
         run: |
           sed -i '' 's/std::_List_iterator<Node\*>/std::list<Node*>::iterator/g' src/Library/cellbase.cpp
           
-      - name: Fix WallElementInfo circular dependency
+      - name: Fix WallElementInfo circular dependency by using pointers
         run: |
-          # Find the line number of the forward declaration (first occurrence)
-          LINE=$(grep -n "^class WallElementInfo;" src/Library/cellbase.h | head -1 | cut -d: -f1)
-          echo "Found WallElementInfo forward declaration at line: $LINE"
+          # Change WallElementInfo from value to pointer in cellbase.h
+          sed -i '' 's/WallElementInfo info;/WallElementInfo* info;/g' src/Library/cellbase.h
           
-          # Use awk to insert the include after the first forward declaration only
-          awk -v line="$LINE" 'NR==line {print; print "#include \"wallelementinfo.h\""; next} 1' src/Library/cellbase.h > src/Library/cellbase.h.tmp
-          mv src/Library/cellbase.h.tmp src/Library/cellbase.h
-          
-          # Verify it worked
-          echo "=== Lines around line $LINE after change ==="
-          sed -n "${LINE},$((LINE+2))p" src/Library/cellbase.h
+          # Verify the change
+          echo "=== Checking for pointer changes ==="
+          grep -n "WallElementInfo\* info;" src/Library/cellbase.h || echo "Pattern not found!"
 
       - name: Set up Qt
         uses: jurplel/install-qt-action@v3
