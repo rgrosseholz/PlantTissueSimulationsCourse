@@ -31,9 +31,15 @@ jobs:
           # Change WallElementInfo from value to pointer in cellbase.h
           sed -i '' 's/WallElementInfo info;/WallElementInfo* info;/g' src/Library/cellbase.h
           
-          # Verify the change
+          # Remove & operator when passing info (since it's now already a pointer)
+          sed -i '' 's/fillWallElementInfo(&info,/fillWallElementInfo(info,/g' src/Library/cellbase.h
+          sed -i '' 's/stopWallElementInfo(&info)/stopWallElementInfo(info)/g' src/Library/cellbase.h
+          
+          # Verify the changes
           echo "=== Checking for pointer changes ==="
-          grep -n "WallElementInfo\* info;" src/Library/cellbase.h || echo "Pattern not found!"
+          grep -n "WallElementInfo\* info;" src/Library/cellbase.h | head -2
+          echo "=== Checking fillWallElementInfo calls ==="
+          grep -n "fillWallElementInfo(info," src/Library/cellbase.h | head -2
 
       - name: Set up Qt
         uses: jurplel/install-qt-action@v3
