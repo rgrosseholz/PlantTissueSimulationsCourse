@@ -26,11 +26,17 @@ jobs:
         run: |
           sed -i '' 's/std::_List_iterator<Node\*>/std::list<Node*>::iterator/g' src/Library/cellbase.cpp
           
-      - name: Fix WallElementInfo circular dependency
+      - name: Debug and fix WallElementInfo circular dependency
         run: |
-          # Add include after the forward declaration in cellbase.h using awk
-          awk '/^class WallElementInfo;$/ {print; print "#include \"wallelementinfo.h\""; next} 1' src/Library/cellbase.h > src/Library/cellbase.h.tmp
-          mv src/Library/cellbase.h.tmp src/Library/cellbase.h
+          echo "=== Checking for WallElementInfo forward declaration ==="
+          grep -n "class WallElementInfo" src/Library/cellbase.h || echo "Pattern not found!"
+          
+          echo "=== Adding include after forward declaration ==="
+          # Use perl for more reliable in-place editing
+          perl -i -pe 's/(class WallElementInfo;)/$1\n#include "wallelementinfo.h"/' src/Library/cellbase.h
+          
+          echo "=== Verifying the change ==="
+          grep -A 1 "class WallElementInfo" src/Library/cellbase.h
 
       - name: Set up Qt
         uses: jurplel/install-qt-action@v3
